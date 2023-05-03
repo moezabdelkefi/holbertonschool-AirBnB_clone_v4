@@ -1,22 +1,36 @@
+const objAmen = {};
+
 $(document).ready(function () {
-  const amenitiesDict = {};
-
-  $('input[type="checkbox"]').change(function () { // Listen for changes on each input checkbox tag
-    const amenityId = $(this).attr('data-id'); // Get Amenity ID from the DOM
-    const amenityName = $(this).attr('data-name'); // Get Amenity name from the DOM
-
-    if ($(this).is(':checked')) { // If the checkbox is checked
-      amenitiesDict[amenityId] = amenityName; // Store the Amenity ID in the dictionary
-    } else { // If the checkbox is unchecked
-      delete amenitiesDict[amenityId]; // Remove the Amenity ID from the dictionary
+  const checkbox = $('.amenities .popover ul li input[type="checkbox"]');
+  // Event click for amenities checks
+  checkbox.bind('click', function () {
+    const id = $(this).attr('data-id');
+    const name = $(this).attr('data-name');
+    const listName = [];
+    if (this.checked) {
+      if (!(id in objAmen)) {
+        objAmen[id] = name;
+      }
+    } else {
+      delete (objAmen[id]);
     }
-
-    // Update the h4 tag inside the div Amenities with the list of Amenities checked
-    $('.amenities h4').html(Object.values(amenitiesDict).join(', '));
+    for (const i in objAmen) {
+      listName.push(objAmen[i]);
+    }
+    const names = listName.join(', ');
+    $('.amenities h4').text(names);
   });
-
-  fetch('http://0.0.0.0:5001/api/v1/status/')
-    .then(response => response.json())
-    .then(({ status }) => document.querySelector('#api_status').classList.toggle('available', status === 'OK'))
-    .catch(error => console.error('Error fetching API status:', error));
+  // Get is used to verify if API 
+  $.ajax({
+    url: 'http://127.0.0.1:5001/api/v1/status/',
+    type: 'GET',
+    success: function (data) {
+      if (data.status == 'OK'){
+        $('#api_status').addClass('available');
+      }   
+    },
+    error: function () {
+      console.log('error API connection');
+    }
+  });
 });
